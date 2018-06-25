@@ -1,0 +1,4 @@
+urls:
+  Curseforge - Keystroke Launcher:
+    url: https://wow.curseforge.com/projects/keystroke-launcher
+    css_selector: .primary-content
