@@ -1,4 +1,7 @@
 urls:
-  Curseforge - Keystroke Launcher:
-    url: https://wow.curseforge.com/projects/keystroke-launcher
+  https://wow.curseforge.com/projects/keystroke-launcher:
     css_selector: .primary-content
+  https://www.curseforge.com/wow/addons/keystroke-launcher:
+    css_selector: .primary-content
+  https://www.mmo-champion.com/content/:
+    css_selector: .recent-threads

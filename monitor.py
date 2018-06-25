@@ -7,10 +7,14 @@ import glob
 import difflib
 import sys
 import hashlib
+import yaml
 
 from path import Path
 from bs4 import BeautifulSoup
 from aiohttp import ClientSession
+from lxml.html.diff import htmldiff
+
+BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 
 # page = requests.get('https://wow.curseforge.com/projects/keystroke-launcher')
 # based on https://gist.github.com/dmahugh/b043ecbc4c61920aa685e0febbabb959
@@ -42,7 +46,7 @@ async def fetch(url, session):
     async with session.get(url) as response:
         resp = await response.text()
         elapsed = default_timer() - fetch.start_time[url]
-        print('{0:30}{1:5.2f}'.format(url, elapsed))
+        print(f'{url} {response.status} {elapsed:5.2f}')
 
         os.makedirs("data", exist_ok=True)
         with Path("data"):
@@ -56,64 +60,94 @@ async def fetch(url, session):
             # read
             with Path(url_dir):
                 content_sorted = sorted(glob.glob(f"*.txt"))
-                # print(content_sorted)
-                # print(content_sorted[:-2])
 
                 if len(content_sorted) > 1:
-                    #file1 = open(content_sorted[-1], 'r')
-                    #file2 = open(content_sorted[-2], 'r')
-                    # parse html
+                    # this means we have save an old version, compare it to the most recent one
+
+                    # first check if there was a change at all by comparing cecksums
                     hashes = []
                     for content_file in [ content_sorted[-2], content_sorted[-1] ]:
+                        print(f"  file: {content_file}")
                         soup = BeautifulSoup(open(content_file, encoding="utf-8"), 'lxml')
-                        cont = soup.select(".primary-content")[0]
-                        hash = hashlib.md5(cont.encode('utf-8')).hexdigest()
-                        hashes.append(hash)
+                        for script in soup(["script", "style"]):
+                            script.decompose()
 
-                    if hashes[0] == hashes[1]:
-                        print("--> No changes")
+                        css_selector = get_css_selector(url)
+                        if css_selector:
+                            print(f"  css_selector: {css_selector}")
+                            cont = soup.select(css_selector)
+                            if len(cont) > 1:
+                                sys.exit('!! selector not unique')
+                            if not cont:
+                                sys.exit('!! selector no results')
+                            cont = cont[0]
+                        else:
+                            cont = soup.html()
+
+                        #print(cont)
+                        _hash = hashlib.md5(cont.encode('utf-8')).hexdigest()
+                        print(f"  hash: {_hash}")
+                        hashes.append({
+                            'hash_value': _hash,
+                            'cont': str(cont)
+                            })
+
+
+                    if hashes[0]['hash_value'] == hashes[1]['hash_value']:
+                        print("  no change detected")
                     else:
-                        print("--> Changes")
-
-                    # print(hash1)
-                    # for script in soup(["script", "style"]):
-                    #     script.decompose()    # rip out script and style tags
-                    # text = soup.get_text("\n", strip=True)
-
-
-                    # print(f"Comparing from {content_sorted[-1]} to {content_sorted[-2]}")
-                    # file1 = open(content_sorted[-1], 'r')
-                    # file2 = open(content_sorted[-2], 'r')
-
-                    #sys.stdout.writelines(difflib.context_diff(content_sorted[-1], content_sorted[-2]))
-
-                    # diff = difflib.ndiff(file1.readlines(), file2.readlines())
-                    # delta = ''.join(x[2:] for x in diff if x.startswith('- '))
-                    # print(delta)
-
-                    # diff = difflib.ndiff(file1.readlines(), file2.readlines())
-                    # for l in diff:
-                    #     print(l)
-
-                    # html_diff = difflib.HtmlDiff()
-                    # html = html_diff.make_file(file1.readlines(), file2.readlines())
-                    # with open("out.html", 'w') as f:
-                    #     f.write(html)
-
+                        print("  change detected, writing diff.html")
+                        diff = htmldiff(hashes[0]['cont'], hashes[1]['cont'])
+                        with open(f"diff.html", 'w', encoding="utf-8") as f:
+                            f.write("""
+                            <!DOCTYPE html>
+                            <html>
+                            <head>
+                            <style>
+                                ins {background-color: lightgreen;}
+                                del {background-color: LightPink ;}
+                            </style>
+                            </head>
+                            <body>
+                            """)
+                            f.write(diff)
+                            f.write("""
+                            </body>
+                            </html>
+                            """)
         return resp
 
-def md5(fname):
-    hash_md5 = hashlib.md5()
-    with open(fname, "rb") as f:
-        for chunk in iter(lambda: f.read(4096), b""):
-            hash_md5.update(chunk)
-    return hash_md5.hexdigest()
+# def show_diff(url):
+#     url_dir = urlparse(url).netloc
+#     with Path(url_dir):
+#         content_sorted = sorted(glob.glob(f"*.txt"))
+#         htmldiff(content_sorted[-2], content_sorted[-1])
+
+#         for content_file in [ content_sorted[-2], content_sorted[-1] ]:
+
+
+
+def get_css_selector(url):
+    with open(f"{BASE_PATH}/conf.yaml", 'r') as ymlfile:
+        cfg = yaml.load(ymlfile)
+
+    if 'css_selector' in cfg['urls'][url]:
+        return cfg['urls'][url]['css_selector']
 
 if __name__ == '__main__':
+
     # URL_LIST = ['https://facebook.com',
     #             'https://github.com',
     #             'https://google.com',
     #             'https://microsoft.com',
     #             'https://yahoo.com']
-    URL_LIST = ['https://wow.curseforge.com/projects/keystroke-launcher']
-    demo_async(URL_LIST)
+    #URL_LIST = ['https://wow.curseforge.com/projects/keystroke-launcher']
+
+
+    #demo_async(URL_LIST)
+
+    with open(f"{BASE_PATH}/conf.yaml", 'r') as ymlfile:
+        cfg = yaml.load(ymlfile)
+
+    urls = [ el for el in cfg['urls'] ]
+    demo_async(urls)
