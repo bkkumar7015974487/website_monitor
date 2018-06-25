@@ -7,8 +7,8 @@ import glob
 import difflib
 import sys
 import hashlib
-import yaml
 
+import yaml
 from path import Path
 from bs4 import BeautifulSoup
 from aiohttp import ClientSession
@@ -16,8 +16,7 @@ from lxml.html.diff import htmldiff
 
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 
-# page = requests.get('https://wow.curseforge.com/projects/keystroke-launcher')
-# based on https://gist.github.com/dmahugh/b043ecbc4c61920aa685e0febbabb959
+# async and aiohttp based on https://gist.github.com/dmahugh/b043ecbc4c61920aa685e0febbabb959
 
 def demo_async(urls):
     """Fetch list of web pages asynchronously."""
@@ -51,7 +50,8 @@ async def fetch(url, session):
         os.makedirs("data", exist_ok=True)
         with Path("data"):
             # write new
-            url_dir = urlparse(url).netloc
+            url_dir = urlparse(url).netloc + urlparse(url).path
+            url_dir = url_dir.replace("/", '_')
             timestamp = time.time()
             os.makedirs(f"{url_dir}", exist_ok=True)
             with open(f"{url_dir}/{timestamp}.txt", 'w', encoding="utf-8") as f:
@@ -67,14 +67,14 @@ async def fetch(url, session):
                     # first check if there was a change at all by comparing cecksums
                     hashes = []
                     for content_file in [ content_sorted[-2], content_sorted[-1] ]:
-                        print(f"  file: {content_file}")
+                        dprint(f"file: {content_file}")
                         soup = BeautifulSoup(open(content_file, encoding="utf-8"), 'lxml')
                         for script in soup(["script", "style"]):
                             script.decompose()
 
                         css_selector = get_css_selector(url)
                         if css_selector:
-                            print(f"  css_selector: {css_selector}")
+                            dprint(f"css_selector: {css_selector}")
                             cont = soup.select(css_selector)
                             if len(cont) > 1:
                                 sys.exit('!! selector not unique')
@@ -84,22 +84,20 @@ async def fetch(url, session):
                         else:
                             cont = soup.html()
 
-                        #print(cont)
-                        _hash = hashlib.md5(cont.encode('utf-8')).hexdigest()
-                        print(f"  hash: {_hash}")
-                        hashes.append({
-                            'hash_value': _hash,
-                            'cont': str(cont)
-                            })
+                        hashes.append({'cont': str(cont)})
 
+                    # hashes[0] = old version
+                    # hashes[1] = new version
 
-                    if hashes[0]['hash_value'] == hashes[1]['hash_value']:
-                        print("  no change detected")
-                    else:
-                        print("  change detected, writing diff.html")
+                    diff = htmldiff(hashes[0]['cont'], hashes[1]['cont'])
+                    bs_diff = BeautifulSoup(diff, 'lxml')
+                    ins_del = bs_diff.find_all(['ins', 'del'])
+                    if ins_del:
+                        print("?? change detected, writing diff.html")
                         diff = htmldiff(hashes[0]['cont'], hashes[1]['cont'])
                         with open(f"diff.html", 'w', encoding="utf-8") as f:
-                            f.write("""
+
+                            f.write("""\
                             <!DOCTYPE html>
                             <html>
                             <head>
@@ -111,21 +109,17 @@ async def fetch(url, session):
                             <body>
                             """)
                             f.write(diff)
-                            f.write("""
+                            f.write("""\
                             </body>
                             </html>
                             """)
+                    else:
+                        dprint("no change detected")
         return resp
 
-# def show_diff(url):
-#     url_dir = urlparse(url).netloc
-#     with Path(url_dir):
-#         content_sorted = sorted(glob.glob(f"*.txt"))
-#         htmldiff(content_sorted[-2], content_sorted[-1])
-
-#         for content_file in [ content_sorted[-2], content_sorted[-1] ]:
-
-
+def dprint(msg):
+    #print(f"   {msg}")
+    pass
 
 def get_css_selector(url):
     with open(f"{BASE_PATH}/conf.yaml", 'r') as ymlfile:
@@ -135,19 +129,12 @@ def get_css_selector(url):
         return cfg['urls'][url]['css_selector']
 
 if __name__ == '__main__':
-
-    # URL_LIST = ['https://facebook.com',
-    #             'https://github.com',
-    #             'https://google.com',
-    #             'https://microsoft.com',
-    #             'https://yahoo.com']
-    #URL_LIST = ['https://wow.curseforge.com/projects/keystroke-launcher']
-
-
-    #demo_async(URL_LIST)
-
     with open(f"{BASE_PATH}/conf.yaml", 'r') as ymlfile:
         cfg = yaml.load(ymlfile)
 
     urls = [ el for el in cfg['urls'] ]
-    demo_async(urls)
+
+    while True:
+        demo_async(urls)
+        time.sleep(60*5)
+
