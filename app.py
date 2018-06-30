@@ -94,4 +94,4 @@ if __name__ == "__main__":
     )
     thread.start()
     # APP.run(threaded=True)
-    APP.run(host='0.0.0.0')
+    APP.run(host='0.0.0.0', port=os.environ['PORT'])
