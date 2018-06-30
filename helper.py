@@ -13,6 +13,9 @@ import conf
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 WEBSITES_YAML = 'websites.yaml'
 
+def get_poller_interval():
+    return os.getenv('POLLER_INTERVAL', 60)
+
 #
 # yaml
 #

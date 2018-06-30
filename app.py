@@ -1,9 +1,10 @@
-from flask import Flask, render_template, url_for, render_template_string
-from sparkpost import SparkPost
 import os
 import sys
 from time import sleep
-from concurrent.futures import ThreadPoolExecutor
+import threading
+
+from flask import Flask, render_template, url_for, render_template_string
+from sparkpost import SparkPost
 
 import helper
 import conf
@@ -69,29 +70,21 @@ def send():
     helper.p(response)
     return 'sent'
 
-#
-# Long Running Background Task
-#
-# EXECUTOR = ThreadPoolExecutor(2)
-
-# def monitor_scheduler():
-#     while True:
-#         helper.p('ping')
-#         monitor.start_async(helper.get_config_urls())
-#         sleep(60)
-
 def ping():
     while True:
         helper.p('ping')
         monitor.start_async(helper.get_config_urls())
-        sleep(25)
+        sleep(helper.get_poller_interval())
 
-import threading
 if __name__ == "__main__":
-    #EXECUTOR.submit(monitor_scheduler)
+    # poor mans scheduler
     thread = threading.Thread(
         target=ping
     )
     thread.start()
-    # APP.run(threaded=True)
-    APP.run(host='0.0.0.0', port=os.environ['PORT'])
+
+    if 'PORT' in os.environ:
+        # we assume that we are in Heroku
+        APP.run(host='0.0.0.0', port=os.environ['PORT'])
+    else:
+        APP.run(debug=True)
