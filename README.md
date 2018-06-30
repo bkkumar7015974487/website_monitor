@@ -1,11 +1,11 @@
 # Website Monitor (work in progress)
 
-When I'm big, I will be a deployable website monitor using the Heroku free tier-
+When I'm big, I will be a deployable website monitor using the Heroku free tier.
 
 Design goals:
 
-* simplicity
-* online but no running costs
+* As simple as possible: no external database or scheduler
+* Online but no running costs
 
 ## Set up
 
@@ -25,11 +25,6 @@ Design goals:
 Now you got multiple options:
 
 * Just start the webserver: `python app.py`
-* Start Heroku locally
+* Start Heroku: `heroku local web -f Procfile`
 
 ## Configuration
-
-## Scheduler
-
-`heroku addons:create scheduler:standard`
-`heroku addons:docs scheduler`

@@ -1,10 +1,13 @@
 urls:
-  # https://wow.curseforge.com/projects/keystroke-launcher:
-  #   css_selector: .primary-content
-  # https://www.curseforge.com/wow/addons/keystroke-launcher:
-  #   css_selector: .primary-content
-  # https://www.curseforge.com/wow/addons/need-to-know:
-  #   css_selector: 'section#comments'
+  keystroke launcher wow.curseforge:
+    url: https://wow.curseforge.com/projects/keystroke-launcher
+    css_selector: .primary-content
+  keystroke launche curseforge:
+    url: https://www.curseforge.com/wow/addons/keystroke-launcher
+    css_selector: .primary-content
+  need to know:
+    url: https://www.curseforge.com/wow/addons/need-to-know
+    css_selector: 'section#comments'
   mmo-champion content:
     url: https://www.mmo-champion.com/content/
     css_selector: 'div#section_content'

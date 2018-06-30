@@ -73,7 +73,9 @@ def send():
 def ping():
     while True:
         monitor.start_async(helper.get_config_urls())
-        sleep(helper.get_poller_interval())
+        next_in = helper.get_poller_interval()
+        helper.p(f"Run finished, next in {next_in}s")
+        sleep(next_in)
 
 if __name__ == "__main__":
     # poor mans scheduler
