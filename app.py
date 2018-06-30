@@ -72,7 +72,6 @@ def send():
 
 def ping():
     while True:
-        helper.p('ping')
         monitor.start_async(helper.get_config_urls())
         sleep(helper.get_poller_interval())
 
@@ -87,4 +86,5 @@ if __name__ == "__main__":
         # we assume that we are in Heroku
         APP.run(host='0.0.0.0', port=os.environ['PORT'])
     else:
-        APP.run(debug=True)
+        os.environ["FLASK_ENV"] = "development"
+        APP.run()
