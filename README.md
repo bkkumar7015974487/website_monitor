@@ -28,3 +28,8 @@ Now you got multiple options:
 * Start Heroku locally
 
 ## Configuration
+
+## Scheduler
+
+`heroku addons:create scheduler:standard`
+`heroku addons:docs scheduler`

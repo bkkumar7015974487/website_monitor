@@ -3,6 +3,7 @@ import glob
 from urllib.parse import urlparse
 import datetime
 import re
+import sys
 
 import yaml
 from path import Path
@@ -30,8 +31,10 @@ def _get_yaml():
 #
 # debug print & verbosity
 #
-def dprint(msg):
-    print(f"   {msg}")
+def p(*args):
+  print(args[0] % (len(args) > 1 and args[1:] or []))
+  sys.stdout.flush()
+
 
 #
 # urls

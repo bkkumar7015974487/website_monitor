@@ -1,1 +1,1 @@
-web: waitress-serve --listen=*:8000 app:APP
+web: python app.py

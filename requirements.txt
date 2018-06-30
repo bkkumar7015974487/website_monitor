@@ -6,6 +6,6 @@ PyYAML==3.12
 Flask
 Jinja2
 Werkzeug
-gunicorn
+#gunicorn
 
 sparkpost

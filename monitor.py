@@ -20,16 +20,18 @@ import conf
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 
 
-def demo_async(config_urls):
+def start_async(config_urls):
     """Fetch list of web pages asynchronously."""
     start_time = default_timer()
 
-    loop = asyncio.get_event_loop() # event loop
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    #loop = asyncio.get_event_loop() # event loop
     future = asyncio.ensure_future(fetch_all(config_urls)) # tasks to do
     loop.run_until_complete(future) # loop until done
 
     tot_elapsed = default_timer() - start_time
-    print('Total time: {0:5.2f}'.format(tot_elapsed))
+    helper.p('Total time: {0:5.2f}'.format(tot_elapsed))
 
 async def fetch_all(config_urls):
     """Launch requests for all web pages."""
@@ -47,7 +49,7 @@ async def fetch(url_name, url_config, session):
     async with session.get(url_config['url']) as response:
         resp = await response.text()
         elapsed = default_timer() - fetch.start_time[url_name]
-        print(f"{response.status} {elapsed:5.2f} {url_name:25}s {url_config['url']}")
+        helper.p(f"{response.status} {elapsed:5.2f} {url_name:25}s {url_config['url']}")
 
         os.makedirs(conf.DATA_DIR, exist_ok=True)
         with Path(conf.DATA_DIR):
@@ -68,14 +70,14 @@ async def fetch(url_name, url_config, session):
                     # first check if there was a change at all by comparing cecksums
                     hashes = []
                     for content_file in [ content_sorted[-2], content_sorted[-1] ]:
-                        helper.dprint(f"file: {content_file}")
+                        helper.p(f"file: {content_file}")
                         soup = BeautifulSoup(open(content_file, encoding="utf-8"), 'lxml')
                         for script in soup(["script", "style"]):
                             script.decompose()
 
                         if 'css_selector' in url_config:
                             css_selector = url_config['css_selector']
-                            helper.dprint(f"css_selector: {css_selector}")
+                            helper.p(f"css_selector: {css_selector}")
                             cont = soup.select(css_selector)
                             if len(cont) > 1:
                                 sys.exit('!! selector not unique')
@@ -99,16 +101,12 @@ async def fetch(url_name, url_config, session):
                     if ins_del:
                         diff = htmldiff(hashes[0]['cont'], hashes[1]['cont'])
                         diff_file = f"{hashes[0]['file_name']}_to_{hashes[1]['file_name']}_{conf.DIFF_FILE_ENDING}"
-                        print(f"?? change detected, writing diff to {diff_file}")
+                        helper.p(f"?? change detected, writing diff to {diff_file}")
                         with open(diff_file, 'w', encoding="utf-8") as f:
                             f.write(diff)
                     else:
-                        helper.dprint("no change detected")
+                        helper.p("no change detected")
         return resp
 
 if __name__ == '__main__':
-    #demo_async(helper.get_config_urls())
-    while True:
-        demo_async(helper.get_config_urls())
-        time.sleep(60)
-
+    start_async(helper.get_config_urls())

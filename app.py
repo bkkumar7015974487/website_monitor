@@ -2,36 +2,19 @@ from flask import Flask, render_template, url_for, render_template_string
 from sparkpost import SparkPost
 import os
 import sys
-import asyncio
-import threading
-import atexit
+from time import sleep
+from concurrent.futures import ThreadPoolExecutor
 
 import helper
 import conf
+import monitor
 
 APP = Flask(__name__)
 
 # per http://octomaton.blogspot.com/2014/07/hello-world-on-heroku-with-python.html
 
-@APP.after_request
-def flush(response):
-    # to see log messages locally
-    sys.stdout.flush()
-    return response
-
-@asyncio.coroutine
-def hello_world():
-    yield from asyncio.sleep(1)
-    print('Hello World')
-    asyncio.ensure_future(hello_world())
-
 @APP.route('/')
 def source():
-
-    loop = asyncio.get_event_loop() # event loop
-    asyncio.ensure_future(hello_world())
-    loop.run_forever()
-
     urls_data = []
     for url_name, url_config in helper.get_config_urls().items():
         urls_data.append({
@@ -83,45 +66,32 @@ def send():
         from_email=from_email,
         subject='Oh hey!'
     )
-    print(response)
+    helper.p(response)
     return 'sent'
 
+#
+# Long Running Background Task
+#
+# EXECUTOR = ThreadPoolExecutor(2)
 
-POOL_TIME = 5 #Seconds
+# def monitor_scheduler():
+#     while True:
+#         helper.p('ping')
+#         monitor.start_async(helper.get_config_urls())
+#         sleep(60)
 
-# variables that are accessible from anywhere
-commonDataStruct = {}
-# lock to control access to variable
-dataLock = threading.Lock()
-# thread handler
-yourThread = threading.Thread()
+def ping():
+    while True:
+        helper.p('ping')
+        monitor.start_async(helper.get_config_urls())
+        sleep(25)
 
-def create_app():
-
-    def interrupt():
-        global yourThread
-        yourThread.cancel()
-
-    def doStuff():
-        global commonDataStruct
-        global yourThread
-        with dataLock:
-        # Do your stuff with commonDataStruct Here
-
-        # Set the next thread to happen
-        yourThread = threading.Timer(POOL_TIME, doStuff, ())
-        yourThread.start()
-
-    def doStuffStart():
-        # Do initialisation stuff here
-        global yourThread
-        # Create your thread
-        yourThread = threading.Timer(POOL_TIME, doStuff, ())
-        yourThread.start()
-
-    doStuffStart()
-    # When you kill Flask (SIGTERM), clear the trigger for the next thread
-    atexit.register(interrupt)
-
-    # APP.run(debug=True)
-    APP.run(threaded=True)
+import threading
+if __name__ == "__main__":
+    #EXECUTOR.submit(monitor_scheduler)
+    thread = threading.Thread(
+        target=ping
+    )
+    thread.start()
+    # APP.run(threaded=True)
+    APP.run()
