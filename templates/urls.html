@@ -1,0 +1,16 @@
+<table class="table is-narrow">
+    <thead>
+        <tr>
+            <th>url name</th>
+            <th>url</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for url_data in urls_data %}
+            <tr>
+                <td><a href="{{ url_for('url', dir_name=url_data.dir_name) }}">{{ url_data.name }}</a></td>
+                <td>{{ url_data.url }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

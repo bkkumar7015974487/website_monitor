@@ -1,9 +1,0 @@
-urls:
-  https://wow.curseforge.com/projects/keystroke-launcher:
-    css_selector: .primary-content
-  https://www.curseforge.com/wow/addons/keystroke-launcher:
-    css_selector: .primary-content
-  https://www.curseforge.com/wow/addons/need-to-know:
-    css_selector: 'section#comments'
-  https://www.mmo-champion.com/content/:
-    css_selector: 'div#section_content'

@@ -1,0 +1,19 @@
+<h1>{{ header }}</h1>
+<table class="table is-narrow">
+    <thead>
+        <tr>
+            <th>name</th>
+            <th>date</th>
+            <th>diff file (if exist)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for check_file in check_files %}
+            <tr>
+                <td>{{ check_file.name }}</td>
+                <td>{{ check_file.date }}</td>
+                <td>{{ check_file.diff_file|safe }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
