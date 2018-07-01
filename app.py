@@ -3,6 +3,7 @@ import sys
 from time import sleep
 import threading
 import requests
+import logging
 
 from flask import Flask, render_template, url_for, render_template_string
 from sparkpost import SparkPost
@@ -12,6 +13,11 @@ import conf
 import monitor
 
 APP = Flask(__name__)
+
+# https://gist.github.com/seanbehan/547f5fc599bde304c89694a98c102bab
+if 'DYNO' in os.environ:
+    APP.logger.addHandler(logging.StreamHandler(sys.stdout))
+    APP.logger.setLevel(logging.ERROR)
 
 # per http://octomaton.blogspot.com/2014/07/hello-world-on-heroku-with-python.html
 
@@ -80,8 +86,10 @@ def poller():
         monitor.start_async(helper.get_config_urls())
         next_in = helper.get_poller_interval()
 
-        # ping server to prevent idling
-        requests.get(f"http://{os.environ['HEROKU_APP_NAME']}.herokuapp.com/ping")
+        # we ping ourselves to prevent the dyno from idling
+        # this only works when the dyno-metadata plugin was added to the app
+        if 'HEROKU_APP_NAME' in os.environ:
+            requests.get(f"http://{os.environ['HEROKU_APP_NAME']}.herokuapp.com/ping")
 
         helper.p(f"Run finished, next in {next_in}s")
         sleep(next_in)
