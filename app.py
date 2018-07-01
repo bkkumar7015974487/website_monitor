@@ -76,6 +76,10 @@ def url_diff(website_slug, diff_name):
 def ping():
     return 'pong'
 
+@APP.route('/sendmail')
+def sendmail():
+    helper.send_mail('This is a test')
+    return 'Mail sent'
 
 def poller():
     """Poor mans scheduler, runs continously in the background and triggers our monitoring jobs"""

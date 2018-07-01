@@ -4,6 +4,8 @@ from urllib.parse import urlparse
 import datetime
 import re
 import sys
+import smtplib
+from email.mime.text import MIMEText
 
 import yaml
 from path import Path
@@ -73,15 +75,12 @@ def get_all_websites():
         websites.append(Website(website_name=url_name))
     return websites
 
-def send_mail(subject=None, text='n/t'):
-    sparky = SparkPost() # uses environment variable
-    from_email = 'test@' + os.environ.get('SPARKPOST_SANDBOX_DOMAIN') # 'test@sparkpostbox.com'
-
-    response = sparky.transmission.send(
-        use_sandbox=True,
-        recipients=os.getenv('RECIPIENTS', '').split(','),
-        text=text,
-        from_email=from_email,
-        subject=subject
-    )
-    p(response)
+def send_mail(subject, text='n/t', debug=False):
+    msg = MIMEText(text)
+    msg['Subject'] = subject
+    s = smtplib.SMTP_SSL(os.environ['MAIL_SMTP_SSL_HOST'])
+    if debug:
+        s.set_debuglevel(1)
+    s.login(os.environ['MAIL_SMTP_USERNAME'], os.environ['MAIL_SMTP_PASSWORD'])
+    s.sendmail('website_monitor@herokuapp.com','jan.hofmayer@mailbox.org', msg.as_string())
+    s.quit()
