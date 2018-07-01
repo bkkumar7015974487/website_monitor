@@ -3,13 +3,15 @@
         <tr>
             <th>url name</th>
             <th>url</th>
+            <th>diff count</th>
         </tr>
     </thead>
     <tbody>
-        {% for url_data in urls_data %}
+        {% for website in websites %}
             <tr>
-                <td><a href="{{ url_for('url', dir_name=url_data.dir_name) }}">{{ url_data.name }}</a></td>
-                <td>{{ url_data.url }}</td>
+                <td><a href="{{ url_for('url', website_slug=website.slug) }}">{{ website.name }}</a></td>
+                <td>{{ website.url }}</td>
+                <td>{{ website.diff_files_count }}</td>
             </tr>
         {% endfor %}
     </tbody>

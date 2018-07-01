@@ -9,6 +9,7 @@ import yaml
 from path import Path
 
 import conf
+from website import Website
 
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 WEBSITES_YAML = 'websites.yaml'
@@ -16,46 +17,19 @@ WEBSITES_YAML = 'websites.yaml'
 def get_poller_interval():
     return int(os.getenv('POLLER_INTERVAL', 60))
 
-#
-# yaml
-#
-def get_css_selector(url_name):
-    cfg = _get_yaml()
-    urls = []
-    for url_name in [ el for el in cfg['urls'] ]:
-        urls.append(cfg['urls'][url_name]['css_selector'])
-    return urls
-
-def _get_yaml():
+def get_cfg():
     with open(f"{BASE_PATH}/{WEBSITES_YAML}", 'r') as ymlfile:
         cfg = yaml.load(ymlfile)
     return cfg
 
-#
-# debug print & verbosity
-#
+def get_cfg_urls():
+    return get_cfg()['urls']
+
 def p(*args):
   print(args[0] % (len(args) > 1 and args[1:] or []))
   sys.stdout.flush()
 
 
-#
-# urls
-#
-def get_check_files(url_dir):
-    check_files = None
-    check_files_dir = os.path.join(conf.DATA_DIR, url_dir)
-    with Path(check_files_dir):
-        check_files = sorted(glob.glob(f"*{conf.CHECK_FILE_ENDING}"),)
-    return check_files
-
-def get_config_urls():
-    cfg = _get_yaml()
-    return cfg['urls']
-
-#
-# check files
-#
 def check_file_to_date_human(check_file):
     """convert the filename, which is a timestamp, into a human date"""
     timestamp = check_file.rstrip(conf.CHECK_FILE_ENDING)
@@ -71,9 +45,6 @@ def find_diff_file(dir_name, check_file):
     if diff_files:
         return diff_files[0]
 
-#
-# Various
-#
 def get_valid_filename(s):
     """
     from https://github.com/django/django/blob/master/django/utils/text.py
@@ -86,3 +57,14 @@ def get_valid_filename(s):
     """
     s = str(s).strip().replace(' ', '_')
     return re.sub(r'(?u)[^-\w.]', '', s)
+
+def in_heroku():
+    """return true if running in Heroku"""
+    # or 'PORT'
+    return 'DYNO' in os.environ
+
+def get_all_websites():
+    websites = []
+    for url_name in get_cfg_urls():
+        websites.append(Website(website_name=url_name))
+    return websites
