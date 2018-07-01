@@ -41,16 +41,6 @@ def check_file_to_date_human(check_file):
     timestamp = check_file.rstrip(conf.CHECK_FILE_ENDING)
     return datetime.datetime.fromtimestamp(float(timestamp)).strftime('%d-%m-%Y %H:%M:%S')
 
-def find_diff_file(dir_name, check_file):
-    timestamp = check_file.rstrip(conf.CHECK_FILE_ENDING)
-    check_files_dir = os.path.join(conf.DATA_DIR, dir_name)
-    diff_files = None
-    with Path(check_files_dir):
-        print(f"*{timestamp}*{conf.DIFF_FILE_ENDING}")
-        diff_files = glob.glob(f"*{timestamp}*{conf.DIFF_FILE_ENDING}")
-    if diff_files:
-        return diff_files[0]
-
 def get_valid_filename(s):
     """
     from https://github.com/django/django/blob/master/django/utils/text.py
