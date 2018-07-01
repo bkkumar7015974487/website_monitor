@@ -2,6 +2,7 @@ import os
 import sys
 from time import sleep
 import threading
+import requests
 
 from flask import Flask, render_template, url_for, render_template_string
 from sparkpost import SparkPost
@@ -55,6 +56,10 @@ def url_diff(dir_name, diff_name):
         content=content[0]
     )
 
+@APP.route('/ping')
+def ping():
+    return 'pong'
+
 @APP.route('/send')
 def send():
     sparky = SparkPost() # uses environment variable
@@ -70,17 +75,21 @@ def send():
     helper.p(response)
     return 'sent'
 
-def ping():
+def poller():
     while True:
         monitor.start_async(helper.get_config_urls())
         next_in = helper.get_poller_interval()
+
+        # ping server to prevent idling
+        requests.get(f"{os.environ['HEROKU_APP_NAME']}.herokuapp.com/ping")
+
         helper.p(f"Run finished, next in {next_in}s")
         sleep(next_in)
 
 if __name__ == "__main__":
     # poor mans scheduler
     thread = threading.Thread(
-        target=ping
+        target=poller
     )
     thread.start()
 

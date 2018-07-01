@@ -13,9 +13,10 @@ Design goals:
 
 1. Get a Heroku Account
 2. Install Heroku Toolbelt and `cd website_monitor`
-3. Create a Heroku instance `heroku create` and note down the url
+3. Create a Heroku instance `heroku create` and note down the hostname
 4. Add [Sparkline](https://elements.heroku.com/addons/sparkpost) (for sending E-Mails): `heroku addons:create sparkpost`
 5. Push to Heroku: `git push heroku master`
+6. Add Hostname: `heroku config:set HOSTNAME=<hostname>`
 
 ### to deploy or develop locally
 
