@@ -102,6 +102,7 @@ async def fetch(website, session):
                         helper.p(f"?? change detected, writing diff to {diff_file}")
                         with open(diff_file, 'w', encoding="utf-8") as f:
                             f.write(diff)
+                        website.notify()
                     else:
                         helper.p("no change detected")
         return resp

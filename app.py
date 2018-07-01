@@ -6,7 +6,6 @@ import requests
 import logging
 
 from flask import Flask, render_template, url_for, render_template_string
-from sparkpost import SparkPost
 
 import helper
 import conf
@@ -31,6 +30,7 @@ def source():
         content=render_template('urls.html', websites=helper.get_all_websites())
         )
 
+
 @APP.route('/urls/start')
 def urls_start():
     monitor.start()
@@ -38,6 +38,7 @@ def urls_start():
         'index.html',
         content="monitor started"
         )
+
 
 @APP.route('/url/<website_slug>')
 def url(website_slug):
@@ -75,21 +76,6 @@ def url_diff(website_slug, diff_name):
 def ping():
     return 'pong'
 
-
-@APP.route('/send')
-def send():
-    sparky = SparkPost() # uses environment variable
-    from_email = 'test@' + os.environ.get('SPARKPOST_SANDBOX_DOMAIN') # 'test@sparkpostbox.com'
-
-    response = sparky.transmission.send(
-        use_sandbox=True,
-        recipients=['endymonium@gmail.com'],
-        html='<html><body><p>Testing SparkPost - the world\'s most awesomest email service!</p></body></html>',
-        from_email=from_email,
-        subject='Oh hey!'
-    )
-    helper.p(response)
-    return 'sent'
 
 def poller():
     """Poor mans scheduler, runs continously in the background and triggers our monitoring jobs"""

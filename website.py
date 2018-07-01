@@ -50,3 +50,7 @@ class Website():
     @property
     def diff_files_count(self):
         return len(self.find_diff_files())
+
+    def notify(self):
+        helper.send_mail(subject=f"Change detected {self.name}")
+

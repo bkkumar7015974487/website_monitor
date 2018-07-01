@@ -10,6 +10,7 @@ from path import Path
 
 import conf
 from website import Website
+from sparkpost import SparkPost
 
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 WEBSITES_YAML = 'websites.yaml'
@@ -25,8 +26,11 @@ def get_cfg():
 def get_cfg_urls():
     return get_cfg()['urls']
 
-def p(*args):
-  print(args[0] % (len(args) > 1 and args[1:] or []))
+# def p(*args):
+#   print(args[0] % (len(args) > 1 and args[1:] or []))
+#   sys.stdout.flush()
+def p(arg):
+  print(arg)
   sys.stdout.flush()
 
 
@@ -68,3 +72,16 @@ def get_all_websites():
     for url_name in get_cfg_urls():
         websites.append(Website(website_name=url_name))
     return websites
+
+def send_mail(subject=None, text='n/t'):
+    sparky = SparkPost() # uses environment variable
+    from_email = 'test@' + os.environ.get('SPARKPOST_SANDBOX_DOMAIN') # 'test@sparkpostbox.com'
+
+    response = sparky.transmission.send(
+        use_sandbox=True,
+        recipients=os.getenv('RECIPIENTS', '').split(','),
+        text=text,
+        from_email=from_email,
+        subject=subject
+    )
+    p(response)

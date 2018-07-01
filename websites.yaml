@@ -11,6 +11,6 @@ urls:
   mmo-champion content:
     url: https://www.mmo-champion.com/content/
     css_selector: 'div#section_content'
-  mmo-champion new posts:
-    url: https://www.mmo-champion.com/content/
-    css_selector: 'div.recent-threads'
+  # mmo-champion new posts:
+  #   url: https://www.mmo-champion.com/content/
+  #   css_selector: 'div.recent-threads'
