@@ -81,7 +81,7 @@ def poller():
         next_in = helper.get_poller_interval()
 
         # ping server to prevent idling
-        requests.get(f"{os.environ['HEROKU_APP_NAME']}.herokuapp.com/ping")
+        requests.get(f"http://{os.environ['HEROKU_APP_NAME']}.herokuapp.com/ping")
 
         helper.p(f"Run finished, next in {next_in}s")
         sleep(next_in)

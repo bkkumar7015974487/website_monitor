@@ -11,12 +11,12 @@ Design goals:
 
 ### Deploy to Heroku
 
-1. Get a Heroku Account
+1. Get a Heroku Account and add a credit card so that you get 1000h dyno hours for free
 2. Install Heroku Toolbelt and `cd website_monitor`
-3. Create a Heroku instance `heroku create` and note down the hostname
-4. Add [Sparkline](https://elements.heroku.com/addons/sparkpost) (for sending E-Mails): `heroku addons:create sparkpost`
-5. Push to Heroku: `git push heroku master`
-6. Add Hostname: `heroku config:set HOSTNAME=<hostname>`
+3. Create a Heroku instance `heroku create` and note down the app name
+4. Add [Sparkline](https://elements.heroku.com/addons/sparkpost) for sending E-Mails: `heroku addons:create sparkpost`
+5. Add dyno-metadata from Heroku Labs: `heroku labs:enable runtime-dyno-metadata -a <app name>`. This provides the `HEROKU_APP_NAME` environment variable, which we need for a pinger to prevent the app from idling
+6. Push to Heroku: `git push heroku master`
 
 ### to deploy or develop locally
 
