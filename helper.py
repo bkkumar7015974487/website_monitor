@@ -9,7 +9,6 @@ import yaml
 from path import Path
 
 import conf
-from website import Website
 
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 WEBSITES_YAML = 'websites.yaml'
@@ -38,10 +37,12 @@ def p(arg):
   print(arg)
   sys.stdout.flush()
 
+def e(arg):
+  print(f"ERROR {arg}")
+  sys.stdout.flush()
 
-def check_file_to_date_human(check_file):
-    """convert the filename, which is a timestamp, into a human date"""
-    timestamp = check_file.rstrip(conf.CHECK_FILE_ENDING)
+
+def timestamp_to_human(timestamp):
     return datetime.datetime.fromtimestamp(float(timestamp)).strftime('%d-%m-%Y %H:%M:%S')
 
 def get_valid_filename(s):
@@ -62,8 +63,3 @@ def in_heroku():
     # or 'PORT'
     return 'DYNO' in os.environ
 
-def get_all_websites():
-    websites = []
-    for url_name in get_cfg_urls():
-        websites.append(Website(website_name=url_name))
-    return websites

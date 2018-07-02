@@ -1,17 +1,17 @@
 <table class="table is-narrow">
     <thead>
         <tr>
-            <th>url name</th>
-            <th>url</th>
-            <th>diff count</th>
+            <th>name</th>
+            <th>changes</th>
+            <th>last change</th>
         </tr>
     </thead>
     <tbody>
         {% for website in websites %}
             <tr>
                 <td><a href="{{ url_for('url', website_slug=website.slug) }}">{{ website.name }}</a></td>
-                <td>{{ website.url }}</td>
                 <td>{{ website.diff_files_count }}</td>
+                <td>{{ website.last_change }}</td>
             </tr>
         {% endfor %}
     </tbody>

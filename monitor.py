@@ -16,6 +16,7 @@ import numpy
 import helper
 import conf
 import notifier
+from website import Website
 
 """ async and aiohttp based on https://gist.github.com/dmahugh/b043ecbc4c61920aa685e0febbabb959 """
 
@@ -23,7 +24,7 @@ BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 
 def start():
     """Fetch list of web pages asynchronously."""
-    websites = helper.get_all_websites()
+    websites = Website.all()
     start_time = default_timer()
 
     loop = asyncio.new_event_loop() # create event loop
@@ -54,13 +55,19 @@ async def fetch(website, session):
 
         os.makedirs(conf.DATA_DIR, exist_ok=True)
         with Path(conf.DATA_DIR):
-            # write new
+            #
+            # WRITE NEW CHECK FILE
+            #
             timestamp = time.time()
             os.makedirs(website.slug, exist_ok=True)
-            with open(f"{website.slug}/{timestamp}{conf.CHECK_FILE_ENDING}", 'w', encoding="utf-8") as f:
+            check_file_name = f"{website.slug}/{timestamp}{conf.CHECK_FILE_ENDING}"
+            with open(check_file_name, 'w', encoding="utf-8") as f:
                 f.write(resp)
+            check_file = website.add_check_file(check_file_name)
 
-            # read
+            #
+            # DIFF ALL CHECK FILES
+            #
             with Path(website.slug):
                 content_sorted = sorted(glob.glob(f"*{conf.CHECK_FILE_ENDING}"))
 
@@ -105,27 +112,32 @@ async def fetch(website, session):
                         s = ('').join([el.get_text() for el in bs_diff.find_all(tag)])
                         for typee in ['numbers', 'letters', 'spaces', 'other']:
                             count = sum(c.isdigit() for c in s)
-                            threshold = website.get_threshold(tag, typee)
-                            if threshold == -1:
-                                # never trigger change based on this
-                                helper.p(f"  {tag} {typee} FALSE because threshold=-1")
-                                do_diff.append(False)
-                            elif threshold == 0:
-                                # ignore this value completely
-                                pass
-                            elif threshold > 0:
-                                if count > threshold:
-                                    helper.p(f"  {tag} {typee} TRUE because count ({count}) > threshold ({threshold})")
-                                    do_diff.append(True)
-                                else:
-                                    helper.p(f"  {tag} {typee} FALSE because count ({count}) < threshold ({threshold})")
+                            if count > 0:
+                                threshold = website.get_threshold(tag, typee)
+                                if threshold == -1:
+                                    # never trigger change
+                                    helper.p(f"  {tag} {typee} FALSE because threshold=-1")
                                     do_diff.append(False)
-                    helper.p(f"Summary: {do_diff}")
+                                elif threshold == 0:
+                                    # always trigger change
+                                    helper.p(f"  {tag} {typee} TRUE because threshold==0")
+                                    do_diff.append(True)
+                                elif threshold > 0:
+                                    if count > threshold:
+                                        helper.p(f"--> {tag} {typee} TRUE because count ({count}) > threshold ({threshold})")
+                                        do_diff.append(True)
+                                    else:
+                                        helper.p(f"--> {tag} {typee} FALSE because count ({count}) < threshold ({threshold})")
+                                        do_diff.append(False)
+                    helper.p(f"--> Summary: {do_diff} --> {numpy.any(do_diff)}")
 
                     if numpy.any(do_diff):
-                        diff_file = f"{hashes[0]['file_name']}_to_{hashes[1]['file_name']}_{conf.DIFF_FILE_ENDING}"
-                        helper.p(f"?? change detected, writing diff to {diff_file}")
-                        with open(diff_file, 'w', encoding="utf-8") as f:
+                        #
+                        # WRITE DIFF FILE
+                        #
+                        diff_file_name = f"{hashes[1]['file_name']}{conf.DIFF_FILE_ENDING}"
+                        helper.p(f"writing diff to {diff_file_name}")
+                        with open(diff_file_name, 'w', encoding="utf-8") as f:
                             f.write("""
                             <style>
                                 ins {
@@ -150,7 +162,8 @@ async def fetch(website, session):
                             </style>
                             """)
                             f.write(diff)
-                        website.notify(text=f"<a href=http://{helper.gethostname()}/url/{website.slug}>/diff/{diff_file}>diff</a>")
+                        diff_file = check_file.add_diff_file(diff_file_name)
+                        website.notify(html=f"<a href=http://{helper.get_hostname()}{diff_file.url}>diff</a>")
                     else:
                         helper.p("no change detected")
         return resp

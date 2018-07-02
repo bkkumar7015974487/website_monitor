@@ -8,11 +8,11 @@
         </tr>
     </thead>
     <tbody>
-        {% for check_file in check_files %}
+        {% for check_file in website.check_files %}
             <tr>
-                <td>{{ check_file.name }}</td>
-                <td>{{ check_file.date }}</td>
-                <td>{{ check_file.diff_files|safe }}</td>
+                <td>{{ check_file.file_name }}</td>
+                <td>{{ check_file.creation_date }}</td>
+                <td>{{ check_file.diff_file.href|safe }}</td>
             </tr>
         {% endfor %}
     </tbody>

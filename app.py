@@ -27,7 +27,7 @@ if helper.in_heroku():
 def source():
     return render_template(
         'index.html',
-        content=render_template('urls.html', websites=helper.get_all_websites()))
+        content=render_template('urls.html', websites=Website.all()))
 
 
 @APP.route('/urls/start')
@@ -38,21 +38,10 @@ def urls_start():
 
 @APP.route('/url/<website_slug>')
 def url(website_slug):
-    check_files = []
     website = Website(website_slug=website_slug)
-    for check_file in website.check_files:
-        diff_files = ''
-        for diff_file in website.find_diff_files(check_file):
-            diff_files += f'<a href={url_for("url_diff", website_slug=website_slug, diff_name=diff_file)}>{diff_file}</a>'
-
-        check_files.append({
-            'name': check_file,
-            'date': helper.check_file_to_date_human(check_file),
-            'diff_files': diff_files
-        })
     return render_template(
         'index.html',
-        content=render_template('url.html', website=website, check_files=check_files))
+        content=render_template('url.html', website=website))
 
 
 @APP.route('/url/<website_slug>/diff/<diff_name>')
@@ -68,12 +57,6 @@ def url_checkfile(website_slug, checkfile_name):
 @APP.route('/ping')
 def ping():
     return 'pong'
-
-
-@APP.route('/sendmail')
-def sendmail():
-    helper.send_mail('This is a test')
-    return 'Mail sent'
 
 
 def poller():
