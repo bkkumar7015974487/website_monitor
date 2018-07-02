@@ -4,8 +4,6 @@ from urllib.parse import urlparse
 import datetime
 import re
 import sys
-import smtplib
-from email.mime.text import MIMEText
 
 import yaml
 from path import Path
@@ -27,6 +25,12 @@ def get_cfg():
 
 def get_cfg_urls():
     return get_cfg()['urls']
+
+def get_hostname():
+    if in_heroku():
+        return f"{os.environ['HEROKU_APP_NAME']}.herokuapp.com"
+    else:
+        return "localhost:5000"
 
 # def p(*args):
 #   print(args[0] % (len(args) > 1 and args[1:] or []))
@@ -64,13 +68,3 @@ def get_all_websites():
     for url_name in get_cfg_urls():
         websites.append(Website(website_name=url_name))
     return websites
-
-def send_mail(subject, text='n/t', debug=False):
-    msg = MIMEText(text)
-    msg['Subject'] = subject
-    s = smtplib.SMTP_SSL(os.environ['MAIL_SMTP_SSL_HOST'])
-    if debug:
-        s.set_debuglevel(1)
-    s.login(os.environ['MAIL_SMTP_USERNAME'], os.environ['MAIL_SMTP_PASSWORD'])
-    s.sendmail('website_monitor@herokuapp.com','jan.hofmayer@mailbox.org', msg.as_string())
-    s.quit()

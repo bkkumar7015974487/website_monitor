@@ -125,7 +125,7 @@ async def fetch(website, session):
                             </style>
                             """)
                             f.write(diff)
-                        website.notify()
+                        website.notify(text=f"<a href=http://{helper.gethostname()}/url/{website.slug}>/diff/{diff_file}>diff</a>")
                     else:
                         helper.p("no change detected")
         return resp
