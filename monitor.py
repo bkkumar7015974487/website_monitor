@@ -98,7 +98,6 @@ async def fetch(website, session):
                     bs_diff = BeautifulSoup(diff, 'lxml')
                     ins_del = bs_diff.find_all(['ins', 'del'])
                     if ins_del:
-                        diff = htmldiff(hashes[0]['cont'], hashes[1]['cont'])
                         diff_file = f"{hashes[0]['file_name']}_to_{hashes[1]['file_name']}_{conf.DIFF_FILE_ENDING}"
                         helper.p(f"?? change detected, writing diff to {diff_file}")
                         with open(diff_file, 'w', encoding="utf-8") as f:
