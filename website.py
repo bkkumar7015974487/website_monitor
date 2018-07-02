@@ -131,8 +131,8 @@ class DiffFile(File):
 
     @property
     def url(self):
-        return url_for("url_diff", website_slug=self.website.slug, diff_name=self.file_name)
+        return f"http://{helper.get_hostname()}/url/{self.website.slug}>/diff/{self.file_name}"
 
     @property
     def href(self):
-        return f"<a href={ url_for('url_diff', website_slug=self.website.slug, diff_name=self.file_name) }>Open Diff</a>"
+        return f"<a href={self.url}>Open Diff</a>"
