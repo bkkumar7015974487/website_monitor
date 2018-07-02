@@ -32,21 +32,22 @@ class Website():
         self.css_selector = self.cfg['css_selector']
         self.files_dir = os.path.join(conf.DATA_DIR, self.slug)
 
-        with Path(self.files_dir):
-            # check files
-            self.check_files = []
-            files = glob.glob(f"*{conf.CHECK_FILE_ENDING}")
-            for _file in files:
-                # collect diff files
-                diff_file = None
-                timestamp = _file.rstrip(conf.CHECK_FILE_ENDING)
-                diff_files = glob.glob(f"*{timestamp}*{conf.DIFF_FILE_ENDING}")
-                if len(diff_files) > 1:
-                    helper.e(f"More than one diff files ({diff_files}) found for check_file ({_file})")
-                elif len(diff_files) == 1:
-                    # create CheckFile
-                    diff_file = diff_files[0]
-                self.check_files.append(CheckFile(self, _file, diff_file))
+        self.check_files = []
+        if os.path.isdir(self.files_dir):
+            with Path(self.files_dir):
+                # check files
+                files = glob.glob(f"*{conf.CHECK_FILE_ENDING}")
+                for _file in files:
+                    # collect diff files
+                    diff_file = None
+                    timestamp = _file.rstrip(conf.CHECK_FILE_ENDING)
+                    diff_files = glob.glob(f"*{timestamp}*{conf.DIFF_FILE_ENDING}")
+                    if len(diff_files) > 1:
+                        helper.e(f"More than one diff files ({diff_files}) found for check_file ({_file})")
+                    elif len(diff_files) == 1:
+                        # create CheckFile
+                        diff_file = diff_files[0]
+                    self.check_files.append(CheckFile(self, _file, diff_file))
 
     def add_check_file(self, check_file_name):
         check_file = CheckFile(self, check_file_name)
