@@ -71,7 +71,8 @@ async def fetch(website, session):
                     for content_file in [ content_sorted[-2], content_sorted[-1] ]:
                         helper.p(f"file: {content_file}")
                         soup = BeautifulSoup(open(content_file, encoding="utf-8"), 'lxml')
-                        for script in soup(["script", "style"]):
+                        for script in soup(["script", "style", "ins", "del"]):
+                            # strip out some tags
                             script.decompose()
 
                         if website.css_selector:
@@ -101,6 +102,29 @@ async def fetch(website, session):
                         diff_file = f"{hashes[0]['file_name']}_to_{hashes[1]['file_name']}_{conf.DIFF_FILE_ENDING}"
                         helper.p(f"?? change detected, writing diff to {diff_file}")
                         with open(diff_file, 'w', encoding="utf-8") as f:
+                            f.write("""
+                            <style>
+                                ins {
+                                    text-decoration: none;
+                                    background-color: #d4fcbc;
+                                    color: black;
+                                    font-size: 22;
+                                }
+
+                                del {
+                                    text-decoration: line-through;
+                                    background-color: #fbb6c2;
+                                    color: #555;
+                                    font-size: 18;
+                                }
+                                body {
+                                    color: lightgray;
+                                }
+                                a {
+                                    color: lightgray;
+                                }
+                            </style>
+                            """)
                             f.write(diff)
                         website.notify()
                     else:

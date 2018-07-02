@@ -5,7 +5,7 @@ import threading
 import requests
 import logging
 
-from flask import Flask, render_template, url_for, render_template_string
+from flask import Flask, render_template, url_for, send_from_directory
 
 import helper
 import conf
@@ -27,29 +27,23 @@ if helper.in_heroku():
 def source():
     return render_template(
         'index.html',
-        content=render_template('urls.html', websites=helper.get_all_websites())
-        )
+        content=render_template('urls.html', websites=helper.get_all_websites()))
 
 
 @APP.route('/urls/start')
 def urls_start():
     monitor.start()
-    return render_template(
-        'index.html',
-        content="monitor started"
-        )
+    return render_template('index.html', content="monitor started")
 
 
 @APP.route('/url/<website_slug>')
 def url(website_slug):
     check_files = []
-    helper.p('ping')
     website = Website(website_slug=website_slug)
-    helper.p(website.name)
     for check_file in website.check_files:
         diff_files = ''
         for diff_file in website.find_diff_files(check_file):
-            diff_files += f'<a href={url_for("url_diff", website_slug=website_slug, diff_name=diff_file)}>Diff</a>'
+            diff_files += f'<a href={url_for("url_diff", website_slug=website_slug, diff_name=diff_file)}>{diff_file}</a>'
 
         check_files.append({
             'name': check_file,
@@ -58,28 +52,29 @@ def url(website_slug):
         })
     return render_template(
         'index.html',
-        content=render_template('url.html', header=website.name, check_files=check_files)
-        )
+        content=render_template('url.html', website=website, check_files=check_files))
 
 
 @APP.route('/url/<website_slug>/diff/<diff_name>')
 def url_diff(website_slug, diff_name):
-    with open(os.path.join(conf.DATA_DIR, website_slug, diff_name)) as f:
-        content = f.readlines()
-    return render_template(
-        'index.html',
-        content=content[0]
-    )
+    return send_from_directory(os.path.join(conf.DATA_DIR, website_slug), diff_name)
+
+
+@APP.route('/url/<website_slug>/checkfile/<checkfile_name>')
+def url_checkfile(website_slug, checkfile_name):
+    return send_from_directory(os.path.join(conf.DATA_DIR, website_slug), checkfile_name)
 
 
 @APP.route('/ping')
 def ping():
     return 'pong'
 
+
 @APP.route('/sendmail')
 def sendmail():
     helper.send_mail('This is a test')
     return 'Mail sent'
+
 
 def poller():
     """Poor mans scheduler, runs continously in the background and triggers our monitoring jobs"""
