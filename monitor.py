@@ -11,6 +11,7 @@ from path import Path
 from bs4 import BeautifulSoup
 from aiohttp import ClientSession
 from lxml.html.diff import htmldiff
+import numpy
 
 import helper
 import conf
@@ -96,8 +97,32 @@ async def fetch(website, session):
 
                     diff = htmldiff(hashes[0]['cont'], hashes[1]['cont'])
                     bs_diff = BeautifulSoup(diff, 'lxml')
-                    ins_del = bs_diff.find_all(['ins', 'del'])
-                    if ins_del:
+
+                    # check if diff
+                    helper.p("Check if diff:")
+                    do_diff = []
+                    for tag in ['ins', 'del']:
+                        s = ('').join([el.get_text() for el in bs_diff.find_all(tag)])
+                        for typee in ['numbers', 'letters', 'spaces', 'other']:
+                            count = sum(c.isdigit() for c in s)
+                            threshold = website.get_threshold(tag, typee)
+                            if threshold == -1:
+                                # never trigger change based on this
+                                helper.p(f"  {tag} {typee} FALSE because threshold=-1")
+                                do_diff.append(False)
+                            elif threshold == 0:
+                                # ignore this value completely
+                                pass
+                            elif threshold > 0:
+                                if count > threshold:
+                                    helper.p(f"  {tag} {typee} TRUE because count ({count}) > threshold ({threshold})")
+                                    do_diff.append(True)
+                                else:
+                                    helper.p(f"  {tag} {typee} FALSE because count ({count}) < threshold ({threshold})")
+                                    do_diff.append(False)
+                    helper.p(f"Summary: {do_diff}")
+
+                    if numpy.any(do_diff):
                         diff_file = f"{hashes[0]['file_name']}_to_{hashes[1]['file_name']}_{conf.DIFF_FILE_ENDING}"
                         helper.p(f"?? change detected, writing diff to {diff_file}")
                         with open(diff_file, 'w', encoding="utf-8") as f:

@@ -63,3 +63,8 @@ class Website():
         s.sendmail('website_monitor@herokuapp.com','jan.hofmayer@mailbox.org', msg.as_string())
         s.quit()
 
+    def get_threshold(self, tag, typee):
+        try:
+            return self.cfg['threshold'][tag][typee]
+        except KeyError:
+            return 0
