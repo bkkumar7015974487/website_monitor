@@ -10,7 +10,6 @@ from path import Path
 
 import conf
 from website import Website
-from sparkpost import SparkPost
 
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 WEBSITES_YAML = 'websites.yaml'
