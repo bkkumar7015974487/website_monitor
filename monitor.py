@@ -110,8 +110,13 @@ async def fetch(website, session):
                     do_diff = []
                     for tag in ['ins', 'del']:
                         s = ('').join([el.get_text() for el in bs_diff.find_all(tag)])
-                        for typee in ['numbers', 'letters', 'spaces', 'other']:
-                            count = sum(c.isdigit() for c in s)
+                        for typee in ['numbers', 'letters']:
+                            count = 0
+                            if typee == 'number':
+                                count = sum(c.isdigit() for c in s)
+                            elif typee == 'letters':
+                                count = sum(c.isalpha() for c in s)
+
                             if count > 0:
                                 threshold = website.get_threshold(tag, typee)
                                 if threshold == -1:
@@ -163,7 +168,7 @@ async def fetch(website, session):
                             """)
                             f.write(diff)
                         diff_file = check_file.add_diff_file(diff_file_name)
-                        website.notify(html=f"<a href=http://{helper.get_hostname()}{diff_file.url}>diff</a>")
+                        website.notify(html=f"<a href={diff_file.url}>diff</a>")
                     else:
                         helper.p("no change detected")
         return resp
