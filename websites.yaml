@@ -27,10 +27,10 @@ urls:
     threshold:
       ins:
         numbers: -1 # ignore if only the number count changed
-        letters: 100
+        letters: 150
       del:
         numbers: -1
-        letters: 100
+        letters: 150
   # mmo-champion new posts:
   #   url: https://www.mmo-champion.com/content/
   #   css_selector: 'div.recent-threads'
