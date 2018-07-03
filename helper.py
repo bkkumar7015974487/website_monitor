@@ -14,7 +14,7 @@ BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 WEBSITES_YAML = 'websites.yaml'
 
 def get_poller_interval():
-    return int(os.getenv('POLLER_INTERVAL', 60))
+    return int(os.getenv('POLLER_INTERVAL', 300))
 
 def get_cfg():
     with open(f"{BASE_PATH}/{WEBSITES_YAML}", 'r') as ymlfile:

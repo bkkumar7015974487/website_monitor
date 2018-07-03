@@ -4,7 +4,7 @@ Website monitor using the Heroku free tier.
 
 Design goals:
 
-* As simple as possible
+* As simple as possiblePOLLER_INTERVAL
 * Online but no running costs
 * Configurable thresholds and selectors
 
@@ -29,6 +29,7 @@ MAIL_FROM=<email>
 MAIL_SMTP_USERNAME=<usr>
 MAIL_SMTP_PASSWORD=<pwd>
 MAIL_SMTP_SSL_HOST=<host>:<port, usually 465>
+POLLER_INTERVAL=300
 ```
 
 After you are done, these env vars must be mirrored into Heroku. You can do that manually using the Heroku dashboard or use `python env_to_heroku.py`.
