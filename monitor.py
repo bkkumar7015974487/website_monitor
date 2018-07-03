@@ -11,7 +11,6 @@ from path import Path
 from bs4 import BeautifulSoup
 from aiohttp import ClientSession
 from lxml.html.diff import htmldiff
-import numpy
 
 import helper
 import conf
@@ -51,7 +50,7 @@ async def fetch(website, session):
     async with session.get(website.url) as response:
         resp = await response.text()
         elapsed = default_timer() - fetch.start_time[website.slug]
-        helper.p(f"{response.status} {elapsed:5.2f}s {website.name:25} {website.url}")
+        helper.p(f"{response.status} {elapsed:5.2f}s {website.name:25} {website.url} {website.css_selector}")
 
         os.makedirs(conf.DATA_DIR, exist_ok=True)
         with Path(conf.DATA_DIR):
@@ -77,14 +76,12 @@ async def fetch(website, session):
                     # first check if there was a change at all by comparing cecksums
                     hashes = []
                     for content_file in [ content_sorted[-2], content_sorted[-1] ]:
-                        helper.p(f"file: {content_file}")
                         soup = BeautifulSoup(open(content_file, encoding="utf-8"), 'lxml')
                         for script in soup(["script", "style", "ins", "del"]):
                             # strip out some tags
                             script.decompose()
 
                         if website.css_selector:
-                            helper.p(f"css_selector: {website.css_selector}")
                             cont = soup.select(website.css_selector)
                             if len(cont) > 1:
                                 sys.exit('!! selector not unique')
@@ -104,39 +101,55 @@ async def fetch(website, session):
 
                     diff = htmldiff(hashes[0]['cont'], hashes[1]['cont'])
                     bs_diff = BeautifulSoup(diff, 'lxml')
+                    helper.p(f"Check diff between {hashes[0]['file_name']} and {hashes[1]['file_name']}:")
 
-                    # check if diff
-                    helper.p("Check if diff:")
+                    #
+                    # CHECK RULES AND DECIDE IF TO CREATE A DIFF
+                    #
                     do_diff = []
-                    for tag in ['ins', 'del']:
-                        s = ('').join([el.get_text() for el in bs_diff.find_all(tag)])
-                        for typee in ['numbers', 'letters']:
-                            count = 0
-                            if typee == 'number':
-                                count = sum(c.isdigit() for c in s)
-                            elif typee == 'letters':
-                                count = sum(c.isalpha() for c in s)
-
-                            if count > 0:
-                                threshold = website.get_threshold(tag, typee)
-                                if threshold == -1:
-                                    # never trigger change
-                                    helper.p(f"  {tag} {typee} FALSE because threshold=-1")
-                                    do_diff.append(False)
-                                elif threshold == 0:
-                                    # always trigger change
-                                    helper.p(f"  {tag} {typee} TRUE because threshold==0")
-                                    do_diff.append(True)
-                                elif threshold > 0:
-                                    if count > threshold:
-                                        helper.p(f"--> {tag} {typee} TRUE because count ({count}) > threshold ({threshold})")
-                                        do_diff.append(True)
+                    do_diff_threshold = []
+                    ins_del_tags = ('').join([el.get_text() for el in bs_diff.find_all(['ins', 'del'])])
+                    if len(ins_del_tags) > 0:
+                        # per default, we always create diff if there was any change at all
+                        do_diff = 'True'
+                        # now we check the configures threshold
+                        for tag in ['ins', 'del']:
+                            for typee in ['numbers', 'letters']:
+                                s = ('').join([el.get_text() for el in bs_diff.find_all(tag)])
+                                count = 0
+                                if typee == 'numbers':
+                                    count = sum(c.isdigit() for c in s)
+                                elif typee == 'letters':
+                                    count = sum(c.isalpha() for c in s)
+                                helper.p(f"--> {tag} {typee} count is {count}")
+                                if count > 0:
+                                    # only actually do anything if for this tag/type was a change
+                                    threshold = website.get_threshold(tag, typee)
+                                    helper.p(f"--> {tag} {typee} threshold is {threshold}")
+                                    if threshold == 0:
+                                        # 0 is the default value if there was nothing configured
+                                        #do_diff.extend(['True', 'or'])
+                                        do_diff_threshold.append('True')
+                                        helper.p(f"--> {tag} {typee} TRUE because threshold == 0")
+                                    elif threshold < 0:
+                                        # a negative value means, that a change of this type is ignored completely
+                                        do_diff_threshold.append('False')
+                                        helper.p(f"--> {tag} {typee} FALSE because threshold < 0")
                                     else:
-                                        helper.p(f"--> {tag} {typee} FALSE because count ({count}) < threshold ({threshold})")
-                                        do_diff.append(False)
-                    helper.p(f"--> Summary: {do_diff} --> {numpy.any(do_diff)}")
+                                        # a positive value, let's check it agains the actual count
+                                        if count < threshold:
+                                            # there was a change, but the amount is too low
+                                            do_diff_threshold.append('False')
+                                            helper.p(f"--> {tag} {typee} FALSE because count ({count}) < threshold ({threshold})")
+                                        else:
+                                            do_diff_threshold.append('True')
+                                            helper.p(f"--> {tag} {typee} TRUE because count ({count}) > threshold ({threshold})")
+                        do_diff_threshold = "(" + " or ".join(do_diff_threshold) + ")" # merge by OR, because one TRUE is enough to create a diff
 
-                    if numpy.any(do_diff):
+                        do_diff = " and ".join([do_diff, do_diff_threshold]) # merge by AND, because a FALSE in the detailed check overwrites the genreal TRUE
+                        helper.p(f"--> Summary: {do_diff} evals to {eval(do_diff)}")
+
+                    if do_diff and eval(do_diff):
                         #
                         # WRITE DIFF FILE
                         #

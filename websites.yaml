@@ -12,8 +12,12 @@ urls:
     url: https://www.mmo-champion.com/content/
     css_selector: 'div#section_content'
     threshold:
-        ins:
-          numbers: -1 # ignore if only the number count changed
+      ins:
+        numbers: -1 # ignore if only the number count changed
+        letters: 100
+      del:
+        number: -1
+        lettters: 100
   # mmo-champion new posts:
   #   url: https://www.mmo-champion.com/content/
   #   css_selector: 'div.recent-threads'
@@ -21,4 +25,3 @@ urls:
   #     ins:
   #       numbers: -1
   #       letters: 32
-

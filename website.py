@@ -60,7 +60,6 @@ class Website():
             if check_file.has_diff_file:
                 return check_file.diff_file.creation_date
 
-
     @property
     def diff_files_count(self):
         return sum([el.has_diff_file for el in self.check_files])
