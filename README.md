@@ -1,11 +1,12 @@
 # Website Monitor (alpha)
 
-When I'm big, I will be a deployable website monitor using the Heroku free tier.
+Website monitor using the Heroku free tier.
 
 Design goals:
 
-* As simple as possible: no external database or scheduler
+* As simple as possible
 * Online but no running costs
+* Configurable thresholds and selectors
 
 ## Quickstart
 
@@ -34,7 +35,7 @@ After you are done, these env vars must be mirrored into Heroku. You can do that
 
 #### The websites
 
-Add some websites to `websites.yaml`.
+Add some websites to `websites.yaml`. See file for example.
 
 ### 3. Deploy
 

@@ -1,3 +1,16 @@
+# Example
+# urls:
+#   <website name>:
+#     url: <website url>
+#     css_selector: <css selector of element to watch for changes>
+#     threshold:
+#       ins: # insertes
+#         numbers: -1 # never create diff message if only the numbers changed OR
+#         letters: 100 # create diff message if letters inserted is above 100
+#       del: # deletions
+#         numbers: -1
+#         letters: 100
+
 urls:
   keystroke launcher wow.curseforge:
     url: https://wow.curseforge.com/projects/keystroke-launcher
