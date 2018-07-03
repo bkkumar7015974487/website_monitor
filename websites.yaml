@@ -16,8 +16,8 @@ urls:
         numbers: -1 # ignore if only the number count changed
         letters: 100
       del:
-        number: -1
-        lettters: 100
+        numbers: -1
+        letters: 100
   # mmo-champion new posts:
   #   url: https://www.mmo-champion.com/content/
   #   css_selector: 'div.recent-threads'
