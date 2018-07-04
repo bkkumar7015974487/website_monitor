@@ -46,10 +46,10 @@ urls:
       del:
         numbers: -1
         letters: 500
-  mmo-champion new posts:
-    url: https://www.mmo-champion.com/content/
-    css_selector: 'div.recent-threads'
-    threshold:
-      ins:
-        numbers: -1
-        letters: 32
+  # mmo-champion new posts:
+  #   url: https://www.mmo-champion.com/content/
+  #   css_selector: 'div.recent-threads'
+  #   threshold:
+  #     ins:
+  #       numbers: -1
+  #       letters: 32
