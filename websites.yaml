@@ -46,6 +46,12 @@ urls:
       del:
         numbers: -1
         letters: 500
+  TimerBars Curseforge Issues:
+    url: https://wow.curseforge.com/projects/timer-bars/issues
+    css_selector: 'ul.e-menu'
+  TimerBars Curseforge Comments:
+    url: https://www.curseforge.com/wow/addons/timer-bars
+    css_selector: 'section.project__comments'
   # mmo-champion new posts:
   #   url: https://www.mmo-champion.com/content/
   #   css_selector: 'div.recent-threads'

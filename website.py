@@ -66,7 +66,6 @@ class Website():
         helper.sendmail(f"Change detected {self.name}", html_content)
 
     def clean_up(self):
-        helper.p(f"{self.name}, {len(self.check_files)}, {len(self.diff_files)}")
         # remove every check_file which not has a diff_file depending on conf.MAX_CHECK_FILES
         if len(self.check_files) > conf.MAX_CHECK_FILES:
             idx = conf.MAX_CHECK_FILES - 1 # because we count from the back

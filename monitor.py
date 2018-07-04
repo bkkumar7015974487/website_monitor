@@ -131,7 +131,7 @@ async def fetch(website, session):
                 diff_file = check_file.create_diff_file(content)
 
                 # notify for change
-                website.notify(html=f"<a href={diff_file.url}>diff</a>")
+                website.notify(html_content=f"<a href={diff_file.url}>diff</a>")
             else:
                 helper.p("no change detected")
         return resp
