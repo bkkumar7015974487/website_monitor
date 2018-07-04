@@ -51,21 +51,15 @@ async def fetch(website, session):
         elapsed = default_timer() - fetch.start_time[website.slug]
         helper.p(f"{response.status} {elapsed:5.2f}s {website.name:25} {website.url} {website.css_selector}")
 
-        #
         # WRITE NEW CHECK FILE
-        #
         check_file = CheckFile(website).create(resp)
         website.add_check_file(check_file)
 
         if len(website.check_files) > 1:
-            #
             # DIFF LAST TWO CHECK FILES
-            #
             bs_diff, diff = website.get_diff()
 
-            #
             # CHECK RULES AND DECIDE IF TO CREATE A DIFF
-            #
             do_diff = []
             do_diff_threshold = []
             ins_del_tags = ('').join([el.get_text() for el in bs_diff.find_all(['ins', 'del'])])
@@ -109,9 +103,7 @@ async def fetch(website, session):
                 helper.p(f"--> Summary: {do_diff} evals to {eval(do_diff)}")
 
             if do_diff and eval(do_diff):
-                #
                 # WRITE DIFF FILE
-                #
                 content = """
                 <style>
                     ins {
@@ -136,8 +128,9 @@ async def fetch(website, session):
                 </style>
                 """
                 content += diff
-                diff_file = DiffFile(website).create(content)
-                check_file.add_diff_file(diff_file)
+                diff_file = check_file.create_diff_file(content)
+
+                # notify for change
                 website.notify(html=f"<a href={diff_file.url}>diff</a>")
             else:
                 helper.p("no change detected")
