@@ -49,7 +49,3 @@ urls:
   # mmo-champion new posts:
   #   url: https://www.mmo-champion.com/content/
   #   css_selector: 'div.recent-threads'
-  #   threshold:
-  #     ins:
-  #       numbers: -1
-  #       letters: 32

@@ -1,8 +1,6 @@
 import os
 import glob
 import sys
-from email.mime.text import MIMEText
-import smtplib
 import time
 
 from path import Path
@@ -64,16 +62,8 @@ class Website():
     def diff_files_count(self):
         return len(self.diff_files)
 
-    def notify(self, html="n/t", debug=False):
-        """Send Mail using smpts"""
-        msg = MIMEText(html, 'html')
-        msg['Subject'] = f"Change detected {self.name}"
-        s = smtplib.SMTP_SSL(os.environ['MAIL_SMTP_SSL_HOST'])
-        if debug:
-            s.set_debuglevel(1)
-        s.login(os.environ['MAIL_SMTP_USERNAME'], os.environ['MAIL_SMTP_PASSWORD'])
-        s.sendmail('website_monitor@herokuapp.com','jan.hofmayer@mailbox.org', msg.as_string())
-        s.quit()
+    def notify(self, html_content):
+        helper.sendmail(f"Change detected {self.name}", html_content)
 
     def clean_up(self):
         helper.p(f"{self.name}, {len(self.check_files)}, {len(self.diff_files)}")

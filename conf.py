@@ -11,3 +11,5 @@ if not 'DYNO' in os.environ:
 
 MAX_DIFF_FILES = 5
 MAX_CHECK_FILES = 5
+
+APP_NAME = "Website Monitor"

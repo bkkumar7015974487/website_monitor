@@ -4,9 +4,13 @@ from urllib.parse import urlparse
 import datetime
 import re
 import sys
+import time
 
 import yaml
 from path import Path
+from email.mime.text import MIMEText
+from email import utils
+import smtplib
 
 import conf
 
@@ -63,3 +67,20 @@ def in_heroku():
     # or 'PORT'
     return 'DYNO' in os.environ
 
+def sendmail(subject, html_content='n/t', debug=False):
+    """Send Mail using smpts"""
+    # recipients_environ = os.environ['RECIPIENTS']
+    recipients = os.environ['MAIL_RECIPIENTS'].split(',')
+
+    msg = MIMEText(html_content, 'html')
+    msg['Subject'] = subject
+    msg['From'] = conf.APP_NAME
+    msg['To'] = ", ".join(recipients)
+    msg['Date'] = utils.formatdate(localtime=True)
+    s = smtplib.SMTP_SSL(os.environ['MAIL_SMTP_SSL_HOST'])
+    if debug:
+        s.set_debuglevel(1)
+    s.login(os.environ['MAIL_SMTP_USERNAME'], os.environ['MAIL_SMTP_PASSWORD'])
+    s.sendmail('website_monitor@herokuapp.com', recipients, msg.as_string())
+    s.quit()
+    p(f"Send mail to {recipients} with subject={subject}")

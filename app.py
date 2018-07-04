@@ -58,6 +58,10 @@ def url_checkfile(website_slug, checkfile_name):
 def ping():
     return 'pong'
 
+@APP.route('/sendmail')
+def sendmail():
+    helper.sendmail('test')
+    return 'ok'
 
 def poller():
     """Poor mans scheduler, runs continously in the background and triggers our monitoring jobs"""
