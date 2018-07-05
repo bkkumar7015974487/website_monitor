@@ -2,6 +2,7 @@ import os
 import glob
 import sys
 import time
+import requests
 
 from path import Path
 from bs4 import BeautifulSoup
@@ -92,13 +93,19 @@ class Website():
         except KeyError:
             return 0
 
+    def get_css_selector_soup(self):
+        r = requests.get(self.url)
+        soup = helper.get_soup(r.text)
+        if self.css_selector:
+            conts = soup.select(self.css_selector)
+            html = " ".join([str(el) for el in conts])
+            return html
+
     def get_diff(self):
         """Get diff between the latest to website.check_files"""
         hashes = []
         for _check_file in [ self.check_files[-2], self.check_files[-1] ]:
             soup = _check_file.soup
-            for script in soup(["script", "style", "ins", "del"]):
-                script.decompose() # strip out some tags
 
             if self.css_selector:
                 cont = soup.select(self.css_selector)
@@ -142,7 +149,8 @@ class File():
 
     @property
     def soup(self):
-        return BeautifulSoup(open(self.path, encoding="utf-8"), 'lxml')
+        html = open(self.path, encoding="utf-8")
+        return helper.get_soup(html)
 
     @property
     def timestamp(self):

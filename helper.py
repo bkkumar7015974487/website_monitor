@@ -11,6 +11,7 @@ from path import Path
 from email.mime.text import MIMEText
 from email import utils
 import smtplib
+from bs4 import BeautifulSoup
 
 import conf
 
@@ -84,3 +85,10 @@ def sendmail(subject, html_content='n/t', debug=False):
     s.sendmail('website_monitor@herokuapp.com', recipients, msg.as_string())
     s.quit()
     p(f"Send mail to {recipients} with subject={subject}")
+
+def get_soup(html):
+    """common logic for all soup creations"""
+    soup = BeautifulSoup(html, 'lxml')
+    for script in soup(["script", "style", "ins", "del"]):
+        script.decompose() # strip out these tags
+    return soup

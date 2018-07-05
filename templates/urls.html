@@ -4,6 +4,7 @@
             <th>name</th>
             <th>changes</th>
             <th>last change</th>
+            <th>css_selector</th>
         </tr>
     </thead>
     <tbody>
@@ -12,6 +13,7 @@
                 <td><a href="{{ url_for('url', website_slug=website.slug) }}">{{ website.name }}</a></td>
                 <td>{{ website.diff_files_count }}</td>
                 <td>{{ website.last_change }}</td>
+                <td><a href={{ url_for('url_css_selector', website_slug=website.slug) }}>{{ website.css_selector }}</a></td>
             </tr>
         {% endfor %}
     </tbody>

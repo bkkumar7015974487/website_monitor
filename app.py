@@ -44,6 +44,12 @@ def url(website_slug):
         content=render_template('url.html', website=website))
 
 
+@APP.route('/url/<website_slug>/css_selector')
+def url_css_selector(website_slug):
+    website = Website(website_slug=website_slug)
+    return website.get_css_selector_soup()
+
+
 @APP.route('/url/<website_slug>/diff/<diff_name>')
 def url_diff(website_slug, diff_name):
     return send_from_directory(os.path.join(conf.DATA_DIR, website_slug), diff_name)
@@ -58,10 +64,12 @@ def url_checkfile(website_slug, checkfile_name):
 def ping():
     return 'pong'
 
+
 @APP.route('/sendmail')
 def sendmail():
     helper.sendmail('test')
     return 'ok'
+
 
 def poller():
     """Poor mans scheduler, runs continously in the background and triggers our monitoring jobs"""
