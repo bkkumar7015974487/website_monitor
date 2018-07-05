@@ -68,7 +68,13 @@ def ping():
 @APP.route('/sendmail')
 def sendmail():
     helper.sendmail('test')
-    return 'ok'
+    return 'mail send triggered'
+
+
+@APP.route('/pushbullet')
+def pushbullet():
+    helper.push_bullet('test')
+    return 'pushbullet send triggered'
 
 
 def poller():

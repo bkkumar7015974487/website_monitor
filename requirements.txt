@@ -5,3 +5,4 @@ PyYAML==3.12
 Flask==1.0.2
 Jinja2==2.10
 lxml==3.7.3
+pushbullet.py==0.11.0

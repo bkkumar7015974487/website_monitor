@@ -63,9 +63,6 @@ class Website():
     def diff_files_count(self):
         return len(self.diff_files)
 
-    def notify(self, html_content):
-        helper.sendmail(f"Change detected {self.name}", html_content)
-
     def clean_up(self):
         # remove every check_file which not has a diff_file depending on conf.MAX_CHECK_FILES
         if len(self.check_files) > conf.MAX_CHECK_FILES:
@@ -207,3 +204,9 @@ class DiffFile(File):
     @property
     def href(self):
         return f"<a href={self.url}>Open Diff</a>"
+
+    def notify(self):
+        html_content=f"<a href={self.url}>diff</a> for <a href={self.website.url}>{self.website.name}</a>"
+        helper.sendmail(f"Change detected {self.name}", html_content)
+        helper.push_bullet(f"Change detected", self.website.url)
+        helper.push_bullet(f"Diff file", self.url)
