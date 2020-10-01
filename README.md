@@ -30,7 +30,7 @@ POLLER_INTERVAL=300
 
 After you are done, these env vars must be mirrored into Heroku. You can do that manually using the Heroku dashboard or use `python env_to_heroku.py`.
 
-#### E-Mail Notifications
+#### E-Mail Notifications regarding monitoring
 
 Put this into the `.env` file:
 
@@ -43,7 +43,7 @@ MAIL_SMTP_PASSWORD=<pwd>
 MAIL_SMTP_SSL_HOST=<host>:<port, usually 465>
 ```
 
-#### Pushbullet Notifications
+#### Pushbullet Notifications regarding monitoring
 
 1. Create free account on [Pushbullet](https://www.pushbullet.com)
 2. Edit the `.env` file:
@@ -57,11 +57,11 @@ PUSHBULLET_API_KEY=<generated access token>
 
 Add some websites to `websites.yaml`. See file for example.
 
-## 3. Deploy
+## 3. Deploying  Website Monitoring
 
 `git push heroku master`
 
-## How to deploy or develop locally
+## How to deploy or develop locally a website
 
 1. Install the Python dependencies: `pip install -r requirements.txt`
 
